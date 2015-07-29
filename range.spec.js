@@ -92,6 +92,118 @@ describe('DateRange', function() {
 				});
 			});
 		});
+	});
 
+	describe('forEach', function() {
+
+		describe('when unit is not supported', function() {
+			it('throws an exception', function() {
+				var range = new DateRange(new Date(2015, 0, 1), new Date(2015, 0, 2));
+				expect(function() { range.forEach('wasd', function() {}); }).toThrow(new Error('Unsupported unit: "wasd"'));
+			});
+		});
+
+		var specs = {
+			millisecond: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 0, 1), new Date(2015, 0, 1, 0, 0, 0, 2) ],
+			second: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 1, 0), new Date(2015, 0, 1, 0, 0, 2, 0) ],
+			minute: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 1, 0, 0), new Date(2015, 0, 1, 0, 2, 0, 0) ],
+			hour: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 1, 0, 0, 0), new Date(2015, 0, 1, 2, 0, 0, 0) ],
+			date: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 2, 0, 0, 0, 0), new Date(2015, 0, 3, 0, 0, 0, 0) ],
+			month: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 1, 1, 0, 0, 0, 0), new Date(2015, 2, 1, 0, 0, 0, 0) ],
+			year: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2016, 0, 1, 0, 0, 0, 0), new Date(2017, 0, 1, 0, 0, 0, 0) ]
+		};
+
+		Object.keys(specs).forEach(function(unit) {
+			describe('when constructor unit and method parameter is ' + unit, function() {
+				var range = new DateRange(new Date(2015, 0, 1), 3, unit);
+
+				var dates = [];
+				var indexes = [];
+				var fn = function(date, index) {
+					dates.push(date);
+					indexes.push(index);
+				};
+
+				var returned = range.forEach(unit, fn)
+
+				it('returns the range', function() {
+					expect(returned).toBe(range);
+				});
+				it('iterates over the correct dates', function() {
+					expect(dates).toEqual(specs[unit]);
+				});
+				it('provides the correct indexes to the handler during the iteration', function() {
+					expect(indexes).toEqual([0, 1, 2]);
+				});
+			});
+		});
+	});
+
+	describe('map', function() {
+
+		describe('when unit is not supported', function() {
+			it('throws an exception', function() {
+				var range = new DateRange(new Date(2015, 0, 1), new Date(2015, 0, 2));
+				expect(function() { range.forEach('wasd', function() {}); }).toThrow(new Error('Unsupported unit: "wasd"'));
+			});
+		});
+
+		var specs = {
+			millisecond: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 0, 1), new Date(2015, 0, 1, 0, 0, 0, 2) ],
+			second: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 1, 0), new Date(2015, 0, 1, 0, 0, 2, 0) ],
+			minute: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 1, 0, 0), new Date(2015, 0, 1, 0, 2, 0, 0) ],
+			hour: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 1, 0, 0, 0), new Date(2015, 0, 1, 2, 0, 0, 0) ],
+			date: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 2, 0, 0, 0, 0), new Date(2015, 0, 3, 0, 0, 0, 0) ],
+			month: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 1, 1, 0, 0, 0, 0), new Date(2015, 2, 1, 0, 0, 0, 0) ],
+			year: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2016, 0, 1, 0, 0, 0, 0), new Date(2017, 0, 1, 0, 0, 0, 0) ]
+		};
+
+		Object.keys(specs).forEach(function(unit) {
+			describe('when constructor unit and method parameter is ' + unit, function() {
+				var range = new DateRange(new Date(2015, 0, 1), 3, unit);
+
+				var fn = function(date, index) {
+					return { date: date, index: index };
+				};
+
+				var returned = range.map(unit, fn);
+
+				it('maps over the correct dates and returns array with mapped objects', function() {
+					var want = specs[unit].map(fn);
+					expect(returned).toEqual(want);
+				});
+			});
+		});
+	});
+
+	describe('toArray', function() {
+
+		describe('when unit is not supported', function() {
+			it('throws an exception', function() {
+				var range = new DateRange(new Date(2015, 0, 1), new Date(2015, 0, 2));
+				expect(function() { range.toArray('wasd'); }).toThrow(new Error('Unsupported unit: "wasd"'));
+			});
+
+			var specs = {
+				millisecond: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 0, 1), new Date(2015, 0, 1, 0, 0, 0, 2) ],
+				second: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 0, 1, 0), new Date(2015, 0, 1, 0, 0, 2, 0) ],
+				minute: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 0, 1, 0, 0), new Date(2015, 0, 1, 0, 2, 0, 0) ],
+				hour: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 1, 1, 0, 0, 0), new Date(2015, 0, 1, 2, 0, 0, 0) ],
+				date: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 0, 2, 0, 0, 0, 0), new Date(2015, 0, 3, 0, 0, 0, 0) ],
+				month: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2015, 1, 1, 0, 0, 0, 0), new Date(2015, 2, 1, 0, 0, 0, 0) ],
+				year: [ new Date(2015, 0, 1, 0, 0, 0, 0), new Date(2016, 0, 1, 0, 0, 0, 0), new Date(2017, 0, 1, 0, 0, 0, 0) ]
+			};
+
+			Object.keys(specs).forEach(function(unit) {
+				describe('when constructor unit and method parameter is ' + unit, function() {
+					var range = new DateRange(new Date(2015, 0, 1), 3, unit);
+
+					it('returns correct dates', function() {
+						expect(range.toArray(unit)).toEqual(specs[unit]);
+					});
+				});
+			});
+		});
 	});
 });
+
