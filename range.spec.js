@@ -1,11 +1,11 @@
-describe('Range', function() {
+describe('DateRange', function() {
 
 	describe('constructor:', function() {
 
 		describe('when using start + end date paramters', function() {
 			var start = new Date(2015, 0, 1);
 			var end = new Date(2015, 1, 1);
-			var range = new Range(start, end);
+			var range = new DateRange(start, end);
 
 			it('copies the value of start', function() {
 				expect(range.start()).toEqual(start);
@@ -24,14 +24,14 @@ describe('Range', function() {
 
 			it('copies the value of start', function() {
 				var start = new Date(2015, 0, 1);
-				var range = new Range(start, 1, 'day');
+				var range = new DateRange(start, 1, 'day');
 				expect(range.start()).toEqual(start);
 				expect(range.start()).not.toBe(start);
 			})
 
 			describe('when unit is not supported', function() {
 				it('throws an exception', function() {
-					expect(function() { new Range(start, 15, 'wasd') }).toThrow(new Error('Unsupported unit: "wasd"'));
+					expect(function() { new DateRange(start, 15, 'wasd') }).toThrow(new Error('Unsupported unit: "wasd"'));
 				});
 			});
 
@@ -50,11 +50,48 @@ describe('Range', function() {
 			spec.forEach(function(spec) {
 				describe('when unit is ' + spec.unit, function() {
 					it('it sets end correctly', function() {
-						var range = new Range(start, n, spec.unit);
+						var range = new DateRange(start, n, spec.unit);
 						expect(range.end()).toEqual(spec.want);
 					});
 				});
 			});
 		});
-	})
+	});
+
+	describe('count', function() {
+
+		describe('when unit is not supported', function() {
+			it('throws an exception', function() {
+				var range = new DateRange(new Date(2015, 0, 1), new Date(2015, 0, 2));
+				expect(function() { range.count('wasd'); }).toThrow(new Error('Unsupported unit: "wasd"'));
+			});
+		});
+
+		var n = 15;
+		var specs = {
+			millisecond: {},
+			second: { minute: n/60 },
+			minute: { second: n*60, hour: n/60 },
+			hour: { date: n/24, minute: n*60, second: n*60*60 },
+			date: { hour: n*24, minute: n*60*24 }
+			// month and year is not supported yet
+		};
+		Object.keys(specs).forEach(function(unit) {
+			describe('when constructor unit is ' + unit, function() {
+				var range = new DateRange(new Date(2015, 0, 1), n, unit);
+				var spec = specs[unit];
+
+				it('returns correct count for unit: ' + unit, function() {
+					expect(range.count(unit)).toEqual(n);
+				});
+
+				Object.keys(spec).forEach(function(unit) {
+					it('returns correct count for unit: ' + unit, function() {
+						expect(range.count(unit)).toEqual(spec[unit]);
+					});
+				});
+			});
+		});
+
+	});
 });
